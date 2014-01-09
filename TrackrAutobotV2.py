@@ -117,4 +117,6 @@ while nextPage[1]==True:
 		print(emailID[i],file=oss)
 		continue
 	oss.close()
+	emailID=[]
+	epID=[]
 	continue 
