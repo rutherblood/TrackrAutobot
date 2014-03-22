@@ -22,136 +22,138 @@ tempDataPairs=(('operation','backgroundpopupEP'),('type','supply'),('bgrId','14'
 tempCPairs=urllib.parse.urlencode(tempDataPairs)
 sndString=bytes(tempCPairs,'utf-8')
 
-del(tempDataString)
-del(tempString)
+del(tempCPairs)
+del(tempDataPairs)
 del(jarCookie)
 
 def stringMatcherCustom(string1,string2):
-	str2Count=0
-	count=[]
-	temp=1-len(string2)
-	#matchValue=False
-	for i in range(len(string1)):
-		if string1[i]==string2[str2Count]:
-			while(1==1):
-				if str2Count<len(string2)-1:
-					str2Count+=1
-					break
-				else:
-					count+=[i]
-					str2Count=0
-					break
-				break
-			continue
-		else:
-			str2Count=0
-			continue
-		continue
-	for i in range(len(count)):
-		count[i]+=temp
-		continue
-	return count
+  str2Count=0
+  count=[]
+  temp=1-len(string2)
+  for i in range(len(string1)):
+    if string1[i]==string2[str2Count]:
+      while(1==1):
+        if str2Count<len(string2)-1:
+          str2Count+=1
+          break
+        else:
+          count+=[i]
+          str2Count=0
+          break
+        break
+      continue
+    else:
+      str2Count=0
+      continue
+    continue
+  for i in range(len(count)):
+    count[i]+=temp
+    continue
+  return count
 
 
 class autoTrackrSndPageParser(HTMLParser):
-	def __init__(self):
-		self.epID=[]
-		self.sndPage=''
+  def __init__(self):
+    HTMLParser.__init__(self)
+    self.epID=[]
+    self.sndPage=''
 
-	def handle_starttag(self, tag, attrs):
-		if tag=='a':
-				if attrs[1][1][0:8]=='viewEP(\'' and attrs[1][1][len(attrs[1][1])-2:len(attrs[1][1])]=='\')':
-					self.epID+=[attrs[1][1][8:len(attrs[1][1])-2]]
-				
-	def handle_data(self,data):
-		localGinger='/exchange/toptendemandsupply.do?page='
-		getMatch=stringMatcherCustom(data,localGinger)
-		if len(stringMatcherCustom(data,'var len = 51'))!=0: #and len(getMatch)!=0 and len(stringMatcherCustom(data,'Next'))!=0
-			self.sndPage='http://www.myaiesec.net/exchange/toptendemandsupply.do?page='
-			count=0
-			while 1==1:
-				if data[getMatch[len(getMatch)-1]+len(localGinger)+count]=='\'':
-					break
-				else:
-					self.sndPage+=data[getMatch[len(getMatch)-1]+len(localGinger)+count]     #CHNGED
-					count+=1
-					continue
-				continue
-		else:
-			sndPage=''
-	
+  def handle_starttag(self, tag, attrs):
+    if tag=='a':
+        if attrs[1][1][0:8]=='viewEP(\'' and attrs[1][1][len(attrs[1][1])-2:len(attrs[1][1])]=='\')':
+          self.epID+=[attrs[1][1][8:len(attrs[1][1])-2]]
+        
+  def handle_data(self,data):
+    localGinger='/exchange/toptendemandsupply.do?page='
+    getMatch=stringMatcherCustom(data,localGinger)
+    if len(stringMatcherCustom(data,'var len = 51'))!=0: #and len(getMatch)!=0 and len(stringMatcherCustom(data,'Next'))!=0
+      self.sndPage='http://www.myaiesec.net/exchange/toptendemandsupply.do?page='
+      count=0
+      while 1==1:
+        if data[getMatch[len(getMatch)-1]+len(localGinger)+count]=='\'':
+          break
+        else:
+          self.sndPage+=data[getMatch[len(getMatch)-1]+len(localGinger)+count]     #CHNGED
+          count+=1
+          continue
+        continue
+    else:
+      sndPage=''
+  
 class autoTrackrEPPageParser(HTMLParser):
-	def __init__():
-		self.emailID=[]
+  def __init__(self):
+    HTMLParser.__init__(self)
+    self.emailID=''
 
-	def handle_data(self, data):
-		if self.get_starttag_text()=='<a class="linkclass">':
-			if len(stringMatcherCustom(data,'@'))!=0:
-				self.emailID+=[data]
+  def handle_data(self, data):
+    if self.get_starttag_text()=='<a class="linkclass">':
+      if len(stringMatcherCustom(data,'@'))!=0:
+        self.emailID=data
 
 
 
 def main():
-	global constGinger,loginString,sndString
+  global constGinger,loginString,sndString
 
-	sndPage=''
-	epPage=''
+  sndPage=''
+  epPage=''
 
-	stateFile=open('StateFile.txt','r')
-	stateFileRead=stateFile.read()
-	match=stringMatcherCustom(stateFileRead,' ')
-	if len(match)!=0:
-		sndPage=stateFileRead[0:match[0]]
-		epPage=constGinger+stateFileRead[match[0]+1:len(stateFileRead)]
-	else:
-		sndPage='http://www.myaiesec.net/exchange/toptendemandsupply.do'
-		epPage=''
+  stateFile=open('StateFile.txt','r')
+  stateFileRead=stateFile.read()
+  match=stringMatcherCustom(stateFileRead,' ')
+  if len(match)!=0:
+    sndPage=stateFileRead[0:match[0]]
+    epPage=constGinger+stateFileRead[match[0]+1:len(stateFileRead)]
+  else:
+    sndPage='http://www.myaiesec.net/exchange/toptendemandsupply.do'
+    epPage=''
 
-	del(match)
-	del(stateFileRead)	
-	stateFile.close()
-	del(stateFile)
+  del(match)
+  del(stateFileRead)  
+  stateFile.close()
+  del(stateFile)
 
-	urlOpener.open('http://www.myaiesec.net/login.do',loginString)
+  urlOpener.open('http://www.myaiesec.net/login.do',loginString)
 
-	while len(sndPage)!=0:
-		Pager=urlOpener.open(sndPage,sndString)
-		sourceSndPage=Pager.read().decode()
-		Pager.close()
+  while len(sndPage)!=0:
+    Pager=urlOpener.open(sndPage,sndString)
+    sourceSndPage=Pager.read().decode()
+    Pager.close()
 
-		sndPageParse=autoTrackrSndPageParser()
-		sndPageParse.feed(sourceSndPage)
-		sndPageParse.close()
+    sndPageParse=autoTrackrSndPageParser()
+    sndPageParse.feed(sourceSndPage)
+    sndPageParse.close()
 
-		epIDloc=0
-		if len(epPage)!=0:
-			epIDloc=0
-		else:
-			for i in sndPageParse.epID:
-				if epPage[len(constGinger):len(epPage)]==i:
-					epIDloc+=1
-				else:
-					break
+    epIDloc=0
+    if len(epPage)!=0:
+      epIDloc=0
+    else:
+      for i in sndPageParse.epID:
+        if epPage[len(constGinger):len(epPage)]==i:
+          epIDloc+=1
+        else:
+          break
 
-		for i in range(epIDloc,len(sndParse.epID)):
-			epPage=constGinger+sndParse.epID[i]
-			Pager=urlOpener.open(epPage)
-			sourceEPPage=Pager.read().decode()
-			Pager.close()
-			epPageParse=autoTrackrEPPageParser()
-			epPageParse.feed(sourceEPPage)
-			epPageParse.close()
-			emailFile=open('emailIDDataTrackrAutobot.txt','a')
-			print(epPageParse.emailID[i],file=emailFile)
-			emailFile.close()
-			epIDFile=open('StateFile.txt','w')
-			print(sndPage+' '+sndParse.epID[i])   #TEST STATEMENT
-			print(sndPage+' '+sndParse.epID[i],file=epIDFile)
-			epIDFile.close()
-			continue
+    for i in range(epIDloc,len(sndPageParse.epID)):
+      epPage=constGinger+sndPageParse.epID[i]
+      Pager=urlOpener.open(epPage)
+      sourceEPPage=Pager.read().decode()
+      #print(sourceEPPage)  #TEST STATEMENT
+      Pager.close()
+      epPageParse=autoTrackrEPPageParser()
+      epPageParse.feed(sourceEPPage)
+      epPageParse.close()
+      emailFile=open('emailIDDataTrackrAutobot.txt','a')
+      print(epPageParse.emailID,file=emailFile)
+      emailFile.close()
+      epIDFile=open('StateFile.txt','w')
+      #print(sndPage+' '+sndPageParse.epID[i])   #TEST STATEMENT
+      print(sndPage+' '+sndPageParse.epID[i],file=epIDFile)
+      epIDFile.close()
+      continue
 
-		sndPage=sndPageParse.sndPage
-		continue
+    sndPage=sndPageParse.sndPage
+    continue
 
 
 if __name__ == '__main__':
