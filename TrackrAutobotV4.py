@@ -2,7 +2,7 @@
 #Contact Author: <thecaptcha.314159@gmail.com> <github.com/rutherblood>
 #*_T.* denotes code yet to be fully-tested or under the testing phase
 #The bot makes a list of ep email ids on myaiesec.net as defined by the tempString.
-#The bot is robust...upon intepreter/connection error, it saves it state continously and re-begins from there later.
+#The bot is super robust...upon intepreter/connection error, it saves it state continously and re-begins from there later.
 
 import http.cookiejar
 import urllib.request
@@ -17,7 +17,7 @@ constGinger='http://www.myaiesec.net/exchange/viewep.do?operation=executeAction&
 tempCPairs=urllib.parse.urlencode((('userName','twisha.aiesec@gmail.com'),('password','twishaigip'),('login','LOGIN')))
 loginString=bytes(tempCPairs,'utf-8')
 
-tempDataPairs=(('operation','backgroundpopupEP'),('type','supply'),('bgrId','14'),('committeeId','2'),('xchType','GI'),('durFrom','6'),('durTo','78'),('subbgrname','Project Management'),('programType','null'),('categorybyselected','0'),('scope','2'),('exchangetype','GI'),('categoryby','0'),('durationFrom','6'),('durationTo','78'),('btnAdd','Search'))
+tempDataPairs=(('operation','backgroundpopupEP'),('type','supply'),('bgrId','29'),('committeeId','2'),('xchType','GC'),('durFrom','6'),('durTo','78'),('subbgrname','Microeconomics'),('programType','null'),('categorybyselected','0'),('scope','2'),('exchangetype','GC'),('categoryby','0'),('durationFrom','6'),('durationTo','78'),('btnAdd','Search'))
 
 tempCPairs=urllib.parse.urlencode(tempDataPairs)
 sndString=bytes(tempCPairs,'utf-8')
