@@ -16,7 +16,22 @@ urlOpener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jarCook
 tempCPairs=urllib.parse.urlencode((('userName','twisha.aiesec@gmail.com'),('password','twishaigip'),('login','LOGIN')))
 loginString=bytes(tempCPairs,'utf-8')
 
-tempDataPairs=(('operation','backgroundpopupEP'),('type','supply'),('bgrId','29'),('committeeId','2'),('xchType','GC'),('durFrom','6'),('durTo','78'),('subbgrname','Microeconomics'),('programType','null'),('categorybyselected','0'),('scope','2'),('exchangetype','GC'),('categoryby','0'),('durationFrom','6'),('durationTo','78'),('btnAdd','Search'))
+tempDataPairs=(('operation','backgroundpopupEP'),
+	('type','supply'),
+	('bgrId','29'),
+	('committeeId','2'),
+	('xchType','GC'),
+	('durFrom','6'),
+	('durTo','78'),
+	('subbgrname','Microeconomics'),
+	('programType','null'),
+	('categorybyselected','0'),
+	('scope','2'),
+	('exchangetype','GC'),
+	('categoryby','0'),
+	('durationFrom','6'),
+	('durationTo','78'),
+	('btnAdd','Search'))
 
 tempCPairs=urllib.parse.urlencode(tempDataPairs)
 sndString=bytes(tempCPairs,'utf-8')
@@ -50,11 +65,25 @@ def stringMatcherCustom(string1,string2):
     continue
   return count
 
+def stripCharFromStr(strInQues,char):
+	positionValues=stringMatcherCustom(strInQues,char)
+	tempStrInCons=''
+	loopCounter=0
+	while loopCounter<len(strInQues):
+		if loopCounter in positionValues:
+			loopCounter+=len(char)
+			continue
+		else:
+			tempStrInCons+=strInQues[loopCounter]
+			loopCounter+=1
+			continue
+		continue
+	return tempStrInCons
 
 class autoTrackrSndPageParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
-    #self.epName=[]    #EP NAME EDIT
+    self.epNameID=[]    #EP NAME EDIT
     self.epID=[]
     self.sndPage=''
 
@@ -63,11 +92,15 @@ class autoTrackrSndPageParser(HTMLParser):
         if attrs[1][1][0:8]=='viewEP(\'' and attrs[1][1][len(attrs[1][1])-2:len(attrs[1][1])]=='\')':
           self.epID+=[attrs[1][1][8:len(attrs[1][1])-2]]
         
-  def handle_data(self,data):
-  	#if len(stringMatcherCustom(self.get_starttag_text()
+  def handle_data(self,data):									
+    if type(self.get_starttag_text())!=type(None):				#EP NAME EDIT
+      if len(stringMatcherCustom(self.get_starttag_text(),'onclick="viewEP('))!=0:      
+        if len(stringMatcherCustom(data,'EP'))!=0:
+        	self.epNameID+=[data]
+    #print(type(self.get_starttag_text()))  #TEST STATEMENT
     localGinger='/exchange/toptendemandsupply.do?page='
-    getMatch=stringMatcherCustom(data,localGinger)
     if len(stringMatcherCustom(data,'var len = 51'))!=0: #and len(getMatch)!=0 and len(stringMatcherCustom(data,'Next'))!=0
+      getMatch=stringMatcherCustom(data,localGinger)
       self.sndPage='http://www.myaiesec.net/exchange/toptendemandsupply.do?page='
       count=0
       while 1==1:
@@ -85,12 +118,18 @@ class autoTrackrEPPageParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
     self.emailID=''
+    self.epName=''  #EP NAME EDIT
 
   def handle_data(self, data):
+    if type(self.get_starttag_text())!=type(None) and len(data)!=0:
+      if len(stringMatcherCustom(self.get_starttag_text(),'page-mainHeader-class'))!=0:  #EP NAME EDIT
+        if len(stringMatcherCustom(data,'\n'))==0 and len(stringMatcherCustom(data,'\t'))==0 and data!=' ':
+          self.epName=data
+          print(data)   #TEST STATEMENT
+
     if self.get_starttag_text()=='<a class="linkclass">':
       if len(stringMatcherCustom(data,'@'))!=0:
         self.emailID=data
-
 
 
 def mainBot(sndString):                                  #mainBot: UI Edit
@@ -126,6 +165,8 @@ def mainBot(sndString):                                  #mainBot: UI Edit
     sndPageParse.feed(sourceSndPage)
     sndPageParse.close()
 
+    print(sndPageParse.epNameID)
+
     epIDloc=0
     if len(epPage)!=0:
       epIDloc=0
@@ -146,7 +187,7 @@ def mainBot(sndString):                                  #mainBot: UI Edit
       epPageParse.feed(sourceEPPage)
       epPageParse.close()
       emailFile=open('emailIDDataTrackrAutobot.txt','a')
-      print(epPageParse.emailID,file=emailFile)
+      print(epPageParse.epName+'\t'+sndPageParse.epNameID[i]+'\t'+epPageParse.emailID,file=emailFile)   #epPageParse.epName+' '+
       emailFile.close()
       epIDFile=open('StateFile.txt','w')
       #print(sndPage+' '+sndPageParse.epID[i])   #TEST STATEMENT
