@@ -3,6 +3,7 @@
 #*_T.* denotes code yet to be fully-tested or under the testing phase
 #The bot makes a list of ep email ids on myaiesec.net as defined by the tempString.
 #The bot is super robust...upon intepreter/connection error, it saves it state continously and re-begins from there later.
+#To add: Exception Handling for connection errors
 
 import http.cookiejar
 import urllib.request
@@ -12,8 +13,6 @@ jarCookie=http.cookiejar.CookieJar()
 urlOpener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jarCookie))
 
 #Global Constants
-constGinger='http://www.myaiesec.net/exchange/viewep.do?operation=executeAction&epId='
-
 tempCPairs=urllib.parse.urlencode((('userName','twisha.aiesec@gmail.com'),('password','twishaigip'),('login','LOGIN')))
 loginString=bytes(tempCPairs,'utf-8')
 
@@ -55,6 +54,7 @@ def stringMatcherCustom(string1,string2):
 class autoTrackrSndPageParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
+    #self.epName=[]    #EP NAME EDIT
     self.epID=[]
     self.sndPage=''
 
@@ -64,6 +64,7 @@ class autoTrackrSndPageParser(HTMLParser):
           self.epID+=[attrs[1][1][8:len(attrs[1][1])-2]]
         
   def handle_data(self,data):
+  	#if len(stringMatcherCustom(self.get_starttag_text()
     localGinger='/exchange/toptendemandsupply.do?page='
     getMatch=stringMatcherCustom(data,localGinger)
     if len(stringMatcherCustom(data,'var len = 51'))!=0: #and len(getMatch)!=0 and len(stringMatcherCustom(data,'Next'))!=0
@@ -92,9 +93,10 @@ class autoTrackrEPPageParser(HTMLParser):
 
 
 
-def main():
-  global constGinger,loginString,sndString
+def mainBot(sndString):                                  #mainBot: UI Edit
+  global loginString,urlOpener
 
+  constGinger='http://www.myaiesec.net/exchange/viewep.do?operation=executeAction&epId='
   sndPage=''
   epPage=''
 
@@ -157,4 +159,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    mainBot(sndString)                           #mainBot: UI Edit
