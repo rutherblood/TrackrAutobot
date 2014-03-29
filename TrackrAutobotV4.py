@@ -3,7 +3,9 @@
 #*_T.* denotes code yet to be fully-tested or under the testing phase
 #The bot makes a list of ep email ids on myaiesec.net as defined by the tempString.
 #The bot is super robust...upon intepreter/connection error, it saves it state continously and re-begins from there later.
-#To add: Exception Handling for connection errors
+#To add: Exception Handling for connection errors for: 1. Connection Errors 2.Unicode decode byte 0xe9 errors
+#To add: UI
+#To add: Optimize
 
 import http.cookiejar
 import urllib.request
@@ -97,7 +99,6 @@ class autoTrackrSndPageParser(HTMLParser):
       if len(stringMatcherCustom(self.get_starttag_text(),'onclick="viewEP('))!=0:      
         if len(stringMatcherCustom(data,'EP'))!=0:
         	self.epNameID+=[data]
-    #print(type(self.get_starttag_text()))  #TEST STATEMENT
     localGinger='/exchange/toptendemandsupply.do?page='
     if len(stringMatcherCustom(data,'var len = 51'))!=0: #and len(getMatch)!=0 and len(stringMatcherCustom(data,'Next'))!=0
       getMatch=stringMatcherCustom(data,localGinger)
@@ -125,7 +126,6 @@ class autoTrackrEPPageParser(HTMLParser):
       if len(stringMatcherCustom(self.get_starttag_text(),'page-mainHeader-class'))!=0:  #EP NAME EDIT
         if len(stringMatcherCustom(data,'\n'))==0 and len(stringMatcherCustom(data,'\t'))==0 and data!=' ':
           self.epName=data
-          print(data)   #TEST STATEMENT
 
     if self.get_starttag_text()=='<a class="linkclass">':
       if len(stringMatcherCustom(data,'@'))!=0:
@@ -158,30 +158,31 @@ def mainBot(sndString):                                  #mainBot: UI Edit
 
   while len(sndPage)!=0:
     Pager=urlOpener.open(sndPage,sndString)
-    sourceSndPage=Pager.read().decode()
+    sourceSndPage=Pager.read().decode('latin-1').encode('utf-8').decode() #FIX
     Pager.close()
 
     sndPageParse=autoTrackrSndPageParser()
     sndPageParse.feed(sourceSndPage)
     sndPageParse.close()
 
-    print(sndPageParse.epNameID)
-
     epIDloc=0
-    if len(epPage)!=0:
+    if len(epPage)==0:   #FIX
       epIDloc=0
-    else:
+    elif stripCharFromStr(epPage[len(constGinger):len(epPage)],'\n') in sndPageParse.epID:
       for i in sndPageParse.epID:
-        if epPage[len(constGinger):len(epPage)]==i:
+        if epPage[len(constGinger):len(epPage)]==i+'\n':    #STATE BUG FIX: stripCharFromStr(epPage[len(constGinger):len(epPage)],'\n')
           epIDloc+=1
-        else:
           break
+        epIDloc+=1
+        continue
+      if epIDloc==len(sndPageParse.epID):   #FIX
+        sndPage=sndPageParse.sndPage
+        continue
 
     for i in range(epIDloc,len(sndPageParse.epID)):
       epPage=constGinger+sndPageParse.epID[i]
       Pager=urlOpener.open(epPage)
-      sourceEPPage=Pager.read().decode()
-      #print(sourceEPPage)  #TEST STATEMENT
+      sourceEPPage=Pager.read().decode('latin-1').encode('utf-8').decode() #FIX
       Pager.close()
       epPageParse=autoTrackrEPPageParser()
       epPageParse.feed(sourceEPPage)
@@ -190,14 +191,13 @@ def mainBot(sndString):                                  #mainBot: UI Edit
       print(epPageParse.epName+'\t'+sndPageParse.epNameID[i]+'\t'+epPageParse.emailID,file=emailFile)   #epPageParse.epName+' '+
       emailFile.close()
       epIDFile=open('StateFile.txt','w')
-      #print(sndPage+' '+sndPageParse.epID[i])   #TEST STATEMENT
       print(sndPage+' '+sndPageParse.epID[i],file=epIDFile)
       epIDFile.close()
       continue
 
     sndPage=sndPageParse.sndPage
+    print(sndPage)    #TEST STATEMENT
     continue
-
 
 if __name__ == '__main__':
     mainBot(sndString)                           #mainBot: UI Edit
